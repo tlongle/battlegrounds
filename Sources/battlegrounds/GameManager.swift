@@ -10,33 +10,38 @@ class GameManager {
     func start(){
         print("Welcome to the Battlegrounds, \(hero.name)!")
 
-        // Loop simples, verifica que enquanto o hero esta vivo e os enemies nao estao empty
-        while hero.isAlive && !enemies.isEmpty{
-            let currentEnemyType = enemies.removeFirst()
-            let currentEnemy = Enemy(type: currentEnemyType)
+        // Equipar o hero com uma arma
+        // TODO: Adicionar mais armas
+        let sword = Weapon(name: "Stone Sword", damage: 8, criticalChance: 0.35)
+        hero.weapon = sword
+        print("You equipped: \(sword.name)")
 
-            print("\nA wild \(currentEnemyType.rawValue) appears!")
-
-            battle(enemyType: currentEnemyType)
+        // Game loop
+        while hero.isAlive && !enemies.isEmpty {
+            let nextEnemyType = enemies.removeFirst()
+            let Enemy = Enemy(type: nextEnemyType)
+            battle(enemy: enemy)
         }
-
-        print(hero.isAlive ? "Victory!" : "Game Over!")
+        checkVictory()
     }
 
-    func calculateDamage() -> (damage: Int, isCritical: Bool){
-        let base = Int.random(in: 5...15)
-        let isCrit = Bool.random()
-        return (isCrit ? base * 2 : base, isCrit)
+    private func battle(enemy: Enemy){
+        print("\n A wild \(enemy.name) appeared!")
+
+        // Battling loop
+        while hero.isAlive && enemy.isAlive {
+            // Hero turn
+            let dmgDealt = hero.attack()
+            enemy.receiveDamage(dmgDealt)
+            if !enemy.isAlive { break }
+            // Enemy turn
+            let dmgTaken = enemy.attack()
+            hero.receiveDamage(dmgTaken)
+        }
     }
 
-    func battle(enemyType : EnemyType){
-        var enemyDamage = 0
-        switch enemyType {
-            case .goblin: enemyDamage = 5
-            case .orc: enemyDamage = 12
-            case .skeleton: enemyDamage = 3
-            case .zombie: enemyDamage = 4
-        }
+    private func checkVictory() {
+        print(hero.isAlive ? "\n Victory! The arena is cleared." : "\n GAME OVER. Try again next time.")
     }
 
 }

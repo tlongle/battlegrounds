@@ -1,6 +1,7 @@
 @main
 struct battlegrounds {
     static func main() {
-        print("Hello, world!")
+        let game = GameManager(heroName: "test")
+        game.start()
     }
 }
