@@ -1,42 +1,63 @@
 import Foundation
 
+// Este ficheiro foca-se na implementação dos seres (Hero e Enemy).
+// Usa Classes porque precisamos de "Reference Types": se o herói perder vida numa função,
+// essa alteração tem de se manter para o resto do jogo.
+
+// Classes e Heritage/Conformidade (Aula 9)
+// A class Hero conforma-se ao protocolo Fighter, significando que tem tudo o que fighter tem, e mais
 class Hero : Fighter {
+    // Propriedades de um Hero
     let name : String
+    // Mais uma vez uma optional, um Hero pode começar sem arma
     var weapon : Weapon?
     var potions : Int = 3
     let maxHealth : Int
 
+    // Property Observers (Aula 10)
+    // o didSet executa codigo cada vez que o valor health muda
     var health : Int {
         didSet {
+            // Garante que a vida nao ultrapassa o maximo
             if health > maxHealth { health = maxHealth }
 
+            // Verifica se o Hero perdeu vida, se sim, da print de quanta vida perdeu
+            // E de quanta vida ainda tem
             if health < oldValue {
                 print(">> \(name) lost \(oldValue - health) HP! (\(health) HP remaining!)")
             }
         }
     }
 
+    // Este valor é calculado na hora, por isso não é guardado em memória
+    // como é um check simples, neste caso é mais eficiente fazer assim
     var isAlive : Bool { return health > 0 }
 
     var attackPower : Int {
+        // Nil Coalescing (Aula 8)
+        // Se 'weapon' for nil, usa o valor padrao de 2
+        // Se tiver weapon, usa o damage da weapon selecionada
         let weaponDamage = weapon?.damage ?? 2
         return 5 + weaponDamage
     }
 
+    // Initializers (Construtores) (Aula 9)
+    // Configura o estado inicial do objeto
     init(name: String, health: Int) {
         self.name = name
         self.health = health
         self.maxHealth = health
     }
 
-    // Attack with randomized damage
+    // Funcao basica de dano aleatorio
     func attack() -> Int {
         return Int.random(in: (attackPower - 3)...(attackPower + 3))
     }
 
     func heavyAttack() -> Int {
-        // High risk, high reward
-        let hitChance = Int.random(in: 1...100)
+        // High risk, high reward, simples tambem.
+        // Tem mais chances de falhar o ataque, mas dá o dobro do damage se acertar
+        let hitChance = Int.random(in: 20...100)
         if hitChance > 50 {
             return attackPower * 2
         } else {
@@ -45,7 +66,9 @@ class Hero : Fighter {
     }
 
     func heal() {
+        // Verifica se o Hero tem mais de 0 potions e se a sua vida e menor que a vida maxima
         if potions > 0 && health < maxHealth {
+            // Se sim, tira uma potion, e da heal de 30 de vida ao Hero
             potions -= 1
             let healAmount = 30
             health += healAmount
@@ -65,6 +88,7 @@ class Hero : Fighter {
 class Enemy : Fighter {
     let type: EnemyType
     let maxHealth : Int
+    // Observador para reagir ao dano sofrido pelo Hero
     var health: Int {
         didSet {
             if health < oldValue {
